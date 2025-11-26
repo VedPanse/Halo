@@ -168,6 +168,7 @@ This module elevates Halo from a mesh system into a **next-gen search-and-rescue
 ---
 
 # **Technical Architecture**
+<img width="992" height="483" alt="image" src="https://github.com/user-attachments/assets/8868ee11-165a-4583-8eaa-b0f08ff7dd16" />
 
 ```
 +----------------------------------------------------------+
