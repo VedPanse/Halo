@@ -1,380 +1,180 @@
-# **Halo — Disaster-Resilient Mesh Network & Survivor Localization System**
-
-## **A Kotlin Multiplatform Project (KMP Contest 2026 Submission)**
-
-**Halo** is a cross-platform disaster-response communication system that functions even when **cell towers, Wi-Fi, and internet connectivity fail**. Built using **Kotlin Multiplatform**, Halo transforms smartphones into **offline mesh nodes** capable of:
-
-* routing short emergency messages
-* broadcasting survivor presence
-* estimating locations even without GPS
-* forming an autonomous offline survivor heatmap
-* supporting optional AR-based survivor detection
-
-Halo is designed to serve as a **life-saving network of last resort** during earthquakes, hurricanes, building collapses, and blackout zones.
+# Halo  
+## Offline Survivor Localization Using Camera-Based Relative Positioning  
+*Apple Swift Student Challenge Submission*
 
 ---
 
-## **Table of Contents**
+## Overview
 
-* [Introduction](#introduction)
-* [Core Goals](#core-goals)
-* [System Overview](#system-overview)
-* [Halo Core (Guaranteed MVP)](#halo-core-guaranteed-mvp)
-* [Halo AR Locator (Stretch Goal)](#halo-ar-locator-stretch-goal)
-* [Technical Architecture](#technical-architecture)
-* [Mesh Networking Protocol](#mesh-networking-protocol)
-* [Location Estimation](#location-estimation)
-* [Data & Storage](#data--storage)
-* [Power Management](#power-management)
-* [Platform Modules](#platform-modules)
-* [Security Model](#security-model)
-* [Demo Plan](#demo-plan)
-* [Implementation Roadmap](#implementation-roadmap)
-* [Future Extensions](#future-extensions)
+**Halo** is an offline, infrastructure-independent survivor localization system designed for disaster scenarios where cellular networks, GPS, and internet connectivity are unavailable.
+
+Halo turns **phones into local positioning instruments**, using on-device sensors and the camera to estimate **relative positions of nearby devices and people**, helping survivors find each other and helping responders locate clusters of people without relying on centralized infrastructure.
 
 ---
 
-# **Introduction**
+## Problem Statement
 
-In real disasters, the most dangerous resource to lose is **communication**.
+In natural disasters and large-scale emergencies:
 
-* Cell networks collapse
-* GPS becomes unreliable
-* People are trapped under rubble
-* First responders have no visibility
+- Cellular towers are damaged or overloaded.
+- GPS becomes unreliable indoors, underground, or near collapsed structures.
+- Internet access is intermittent or nonexistent.
+- People are separated from family, rescuers, and safe exits.
+- Existing emergency tools assume either connectivity or direct visibility.
 
-**Halo solves this by turning every smartphone into a signal beacon and mesh router.**
-Survivors’ phones coordinate with others nearby, forming a resilient **peer-to-peer emergency network**.
-
-Halo operates **fully offline**.
-It requires no servers, no infrastructure, no SIM card, no cloud.
+Current solutions fail in the most common disaster condition: **fragmented or zero infrastructure**.
 
 ---
 
-# **Core Goals**
+## Core Insight
 
-## ✔ **Enable communication without infrastructure**
+Even when networks fail, **phones can still see, sense, and reason locally**.
 
-Phones relay emergency packets device-to-device.
+Halo leverages:
+- the camera,
+- motion sensors,
+- short-range peer discovery,
 
-## ✔ **Locate survivors without GPS**
+to answer a critical question:
 
-Using IMU fusion, RSSI-based range estimation, and multi-hop inference.
+> *“Who is near me, and where are they relative to my position?”*
 
-## ✔ **Create a live local map of survivor clusters**
-
-First responders see nearby devices, density, distance, and signal pathways.
-
-## ✔ **Be cross-platform and production-grade**
-
-Build a heavy logic engine shared across Android, iOS, and Desktop using Kotlin Multiplatform (KMP).
-
-## ✔ **Make the AR module optional**
-
-The system is fully complete without AR. AR only enhances visualization when time allows.
+This reframes disaster response from **global location** to **local awareness**.
 
 ---
 
- # **System Overview**
+## Who Uses Halo
 
-Halo consists of two major components:
+### Primary Users: Survivors
+- Individuals trapped, displaced, or navigating unsafe environments
+- Families trying to regroup
+- People attempting to find others nearby without communication
 
-1. **Halo Core** — minimal, robust, contest-ready mesh + survivor mapping
-2. **Halo AR Locator** — optional AR-view for rescuers using camera + sensor fusion
+Survivors actively use Halo to:
+- locate nearby people,
+- move toward safety together,
+- avoid isolation.
 
-The architecture prioritizes:
+### Secondary Users: First Responders
+- Search and rescue teams
+- Emergency personnel entering low-visibility or GPS-denied environments
 
-* reliability
-* offline resilience
-* low power consumption
-* lightweight, compressible packets
-* real-time device awareness
-
----
-
-# **Halo Core (Guaranteed MVP)**
-
-The MVP is a functional, stable offline mesh system with the following features:
-
-### **1. Mesh Networking Layer**
-
-* BLE advertising + scanning
-* WiFi Direct peer discovery
-* Multi-hop routing using a simplified AODV/BATMAN hybrid
-* Packet TTL, dedup, and compression
-* Node heartbeat broadcasts
-
-### **2. Local Position Estimation**
-
-* GPS when available
-* Dead-reckoning (accelerometer + gyroscope + step count)
-* Basic Kalman fusion (shared KMP module)
-* Distance estimation using BLE RSSI smoothing
-
-### **3. Survivor Map**
-
-A real-time offline map that shows:
-
-* Nearby nodes
-* Estimated positions
-* Clusters of survivors
-* Node metadata (battery, movement, timestamp)
-
-### **4. Emergency Messaging**
-
-* Short SOS messages
-* Multi-hop propagation
-* Status updates (“injured,” “safe,” “trapped,” etc.)
-
-### **5. Ultra-Low Power Mode**
-
-* Minimal beacon frequency
-* Background-only operation
-* CPU wake minimization
-* Automatic battery preservation logic
-
-### **6. Clean Minimal UI**
-
-Built with Compose Multiplatform:
-
-* Map
-* Device list
-* SOS panel
-* Power mode toggle
-
-This alone is more than enough for a top-tier submission.
+Responders use Halo to:
+- identify survivor clusters,
+- prioritize search zones,
+- navigate toward groups of people.
 
 ---
 
-# **Halo AR Locator (Stretch Goal)**
+## What Halo Is Not
 
-This module is built **only if time permits** — it is not needed for the MVP.
+- Not a GPS replacement
+- Not a chat or messaging app
+- Not dependent on cloud services
+- Not a social network
+- Not a live tracking system
 
-The AR Locator gives first responders a **camera-based augmented view** showing **triangulated survivor positions** as 3D AR markers.
-
-### **Capabilities**
-
-* Fullscreen AR view with ARKit/ARCore
-* Survivor nodes anchored as glowing markers
-* Distance/direction estimation using BLE + IMU
-* Multi-hop triangulation when direct signal is blocked
-* Optional acoustic fusion (if hardware allows)
-* 3D heatmap mode for cluster visualization
-
-### **Purpose**
-
-This module elevates Halo from a mesh system into a **next-gen search-and-rescue tool**, but is intentionally treated as an optional enhancement.
+Halo focuses strictly on **local, relative positioning**.
 
 ---
 
-# **Technical Architecture**
-<img width="992" height="483" alt="image" src="https://github.com/user-attachments/assets/8868ee11-165a-4583-8eaa-b0f08ff7dd16" />
+## How Halo Works (High-Level)
 
-```
-+----------------------------------------------------------+
-|                       Shared KMP Core                    |
-|  - Routing protocol                                      |
-|  - Packet serialization/compression                      |
-|  - Location + IMU fusion (Kalman)                        |
-|  - Survivor clustering                                   |
-|  - Map data store (SQLDelight)                           |
-+-------------------------+-------------------------------+
-          Android Module                iOS Module
-    - BLE scan/adv              |   - CoreBluetooth
-    - WiFi Direct               |   - Multipeer/nearby modules
-    - Foreground services       |   - Background modes (limited)
-    - ARCore (stretch)          |   - ARKit (stretch)
-```
+1. **Peer Discovery**
+   - Devices discover nearby phones using short-range communication.
+   - No internet or cellular network is required.
 
----
+2. **Camera-Based Sensing**
+   - The camera scans the environment.
+   - Visual features and motion are used to estimate relative distances and directions.
 
-# **Mesh Networking Protocol**
+3. **Dead-Reckoning**
+   - Motion sensors track movement over time.
+   - Relative positions update even when visual contact is lost.
 
-Halo will implement a lightweight hybrid:
+4. **Local Position Graph**
+   - Devices build a local graph of nearby peers.
+   - Positions are relative, not absolute.
 
-* **AODV-style route discovery** (on demand)
-* **BATMAN-style probabilistic rebroadcasting**
-* **TTL + duplicate suppression**
-* **Adaptive rebroadcast delay for congestion control**
-
-Packet types:
-
-* `NODE_BEACON`
-* `POSITION_UPDATE`
-* `SOS_MESSAGE`
-* `ROUTE_REQUEST`
-* `ROUTE_REPLY`
-
-Serialization:
-Compact binary with:
-
-* varints
-* optional gzip or simple custom bit-packing
-* < 150 bytes per packet
+5. **Guidance Interface**
+   - Users see directional cues indicating nearby people.
+   - Optional AR overlays help visualize where others are located.
 
 ---
 
-# **Location Estimation**
+## Privacy and Safety by Design
 
-Halo uses a hybrid pipeline:
+Halo is designed to minimize risk and misuse:
 
-### **GPS Mode**
+- No global location sharing
+- No identity or personal data exchange
+- No cloud storage
+- All computation happens on-device
+- Data exists only locally and temporarily
 
-When satellites available → real GPS.
-
-### **Dead-Reckoning Mode**
-
-When GPS is lost:
-
-* Step detection
-* IMU angle integration
-* Drift correction from mesh neighbors
-* Kalman filtered fused state
-
-### **Triangulation Assistance**
-
-Even without GPS:
-
-* RSSI distance smoothing
-* Multi-hop inferred position
-* Simple trilateration when >2 neighbors exist
+Relative position data expires automatically.
 
 ---
 
-# **Data & Storage**
+## Why Halo Is Not a Gimmick
 
-Using **SQLDelight** for shared storage:
+Halo aligns with real disaster behavior:
 
-* Node table
-* Position history
-* Packet log (bounded LRU)
-* Offline map tile cache
+- People first try to find others nearby.
+- Local visibility and sound are often limited.
+- Infrastructure-dependent systems fail first.
 
-All storage is compact and safe in low-memory conditions.
+Halo works within these constraints and **lowers the barrier to coordination** during emergencies.
 
----
-
-# **Power Management**
-
-Disasters mean dying batteries.
-Halo includes:
-
-* Adaptive beacon frequency
-* Duty-cycled BLE scanning
-* Foreground-service fallback
-* “Emergency Mode” that forces ultra-low usage
-* Packet batching when possible
-
-Goal:
-**Survive 24–48 hours on low battery.**
+It does not promise precision; it provides **directional awareness**.
 
 ---
 
-# **Platform Modules**
+## Why This Is an Apple-First Project
 
-### **Android**
+Halo is deeply aligned with Apple’s platform strengths:
 
-* BLE advertiser/scanner
-* WiFi Direct
-* Foreground service
-* ARCore (optional)
-* Sensors: accelerometer, gyro, barometer
+- Camera-first design
+- On-device intelligence
+- Sensor fusion
+- Privacy-preserving computation
+- Tight integration with iOS frameworks
 
-### **iOS**
-
-* CoreBluetooth
-* Multipeer connectivity (optional fallback)
-* Limited background modes
-* ARKit (optional)
-* Sensors: accelerometer, gyro, barometer
-
-### **Desktop (optional)**
-
-* Visualization
-* Simulation environment
-* Not needed for contest
+This project demonstrates what is possible **only on a modern smartphone**, without external infrastructure.
 
 ---
 
-# **Security Model**
+## Minimal Viable Product (MVP)
 
-* All packets include HMAC-Lite signatures
-* Rotation key per-boot
-* Prevents impersonation/spoofing
-* No heavy crypto (battery constraints)
-* No personal data transmitted
-* No identifiers stored long-term
+The MVP focuses on a single, high-impact capability:
 
----
+- Discover nearby devices offline
+- Estimate their relative direction and distance
+- Display clear guidance to help users move toward each other
 
-# **Demo Plan**
-
-The contest demo will show:
-
-### **Halo Core Demo**
-
-1. Two phones in airplane mode discovering each other
-2. Multi-hop routing with a third device
-3. Survivor map populating
-4. SOS messages propagating
-5. Dead-reckoning position tracking indoors
-
-### **Halo AR Demo (only if built)**
-
-* Camera view
-* AR markers appearing behind walls / obstacles
-* Distance labels tracking as rescuer moves
-* Survivor cluster heatmap
+This keeps the system focused, reliable, and demonstrable.
 
 ---
 
-# **Implementation Roadmap**
+## Novelty and Impact
 
-### **Phase 1 (Weeks 1–3)**
+Halo introduces a new disaster-response primitive:
 
-* KMP project setup
-* BLE scan/advertise on both platforms
-* Simple peer list
-* Packet format + serialization
+> **Local awareness without global connectivity**
 
-### **Phase 2 (Weeks 4–6)**
-
-* Routing protocol (basic)
-* Node heartbeat
-* GPS + dead-reckoning baseline
-* Offline map view
-
-### **Phase 3 (Weeks 7–10)**
-
-* Kalman fusion
-* Survivor clustering
-* SOS messaging
-* Ultra-low power mode
-* Full MVP polish
-
-### **Phase 4 (Weeks 11–14)** ***(stretch)***
-
-* ARCore/ARKit integration
-* Relative positioning overlay
-* Triangulation visualization
+By shifting from absolute location to relative positioning, Halo enables coordination in environments where traditional systems fail.
 
 ---
 
-# **Future Extensions**
+## Conclusion
 
-* Satellite fallback (Iridium SMS-like)
-* External UWB sensor support
-* Drone-assisted mesh extender node
-* Thermal camera integration
-* Cloud synchronization for responders
+Halo is a humanitarian, offline-first system that:
 
----
+- Helps people find each other when infrastructure collapses
+- Uses camera and sensors instead of networks
+- Preserves privacy by design
+- Aligns tightly with Apple’s on-device philosophy
 
-# **Conclusion**
+It is a practical, technically grounded approach to making disaster response more human and more resilient.
 
-**Halo** is a robust, high-impact disaster resilience system demonstrating the full power of **Kotlin Multiplatform** for real-world offline, safety-critical applications.
-
-The MVP is fully attainable.
-The optional AR module is ambitious and visually stunning.
-Together, they make Halo a **top-tier 2026 KMP Contest contender**.
 ---
